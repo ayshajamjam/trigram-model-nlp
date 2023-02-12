@@ -70,10 +70,15 @@ class TrigramModel(object):
         self.lexicon.add("UNK")
         self.lexicon.add("START")
         self.lexicon.add("STOP")
+
+        self.numberOfSentences = 0
+        self.numberOfWords = 0
     
         # Now iterate through the corpus again and count ngrams
         generator = corpus_reader(corpusfile, self.lexicon)
         self.count_ngrams(generator)
+
+
 
 
     def count_ngrams(self, corpus):
@@ -87,23 +92,37 @@ class TrigramModel(object):
         self.bigramcounts = defaultdict(int)
         self.trigramcounts = defaultdict(int)
 
+        unigram_size = 0
+        bigram_size = 0
+        trigram_size = 0
+
         for sentence in corpus:
+            self.numberOfSentences += 1
+
             unigram_list = get_ngrams(sentence, 1)
             bigram_list = get_ngrams(sentence, 2)
             trigram_list = get_ngrams(sentence, 3)
 
             for tup in unigram_list:
-                self.unigramcounts[tup] += 1
+                if(tup != ('START',) and tup != ('STOP',)):
+                    unigram_size += 1
+                    self.unigramcounts[tup] += 1
 
             for tup in bigram_list:
+                bigram_size += 1
                 self.bigramcounts[tup] += 1
 
             for tup in trigram_list:
+                trigram_size += 1
                 self.trigramcounts[tup] += 1
 
-        print(self.unigramcounts[('the',)])
-        print(self.bigramcounts[('START','the')])
-        print(self.trigramcounts[('START','START','the')])
+        # print(self.unigramcounts[('the',)])
+        # print(self.bigramcounts[('START','the')])
+        # print(self.trigramcounts[('START','START','the')])
+        print('Unigram size: ', unigram_size)
+        print('Bigram size: ', bigram_size)
+        print('Trigram size: ', trigram_size)
+        print('\n')
 
         return
 
@@ -112,14 +131,48 @@ class TrigramModel(object):
         COMPLETE THIS METHOD (PART 3)
         Returns the raw (unsmoothed) trigram probability
         """
-        return 0.0
+
+        trigram_count = self.trigramcounts[trigram]
+        print('Input trigram count: ', trigram_count)
+
+        bigram = tuple([(trigram[0:2])])
+
+        if(bigram == (('START', 'START'),)):
+            bigram_count = self.numberOfSentences
+            print('Bigram count (# sentences): ', bigram, ' ', bigram_count)
+        else:
+            bigram_count = self.bigramcounts[bigram]
+            print('Bigram count: ', bigram, ' ', bigram_count)
+
+        raw_probability = trigram_count/bigram_count
+
+        print('Raw input trigram probability: ', raw_probability)
+
+        return raw_probability
 
     def raw_bigram_probability(self, bigram):
         """
         COMPLETE THIS METHOD (PART 3)
         Returns the raw (unsmoothed) bigram probability
         """
-        return 0.0
+
+        bigram_count = self.bigramcounts[bigram]
+
+        print(bigram)
+        print('Input bigram count: ', bigram_count)
+
+        unigram = tuple([(bigram[0])])
+        if(unigram == ('START',)):
+            unigram_count = self.numberOfSentences
+            print('Unigram count (# sentences): ', unigram, ' ', unigram_count)
+        else:
+            unigram_count = self.unigramcounts[unigram]
+            print('Unigram count: ', unigram, ' ', unigram_count)
+
+        raw_probability = bigram_count/unigram_count
+        print('Raw input bigram probability: ', raw_probability)
+
+        return raw_probability
     
     def raw_unigram_probability(self, unigram):
         """
@@ -129,8 +182,27 @@ class TrigramModel(object):
 
         #hint: recomputing the denominator every time the method is called
         # can be slow! You might want to compute the total number of words once, 
-        # store in the TrigramModel instance, and then re-use it.  
-        return 0.0
+        # store in the TrigramModel instance, and then re-use it.
+
+        input_count = self.unigramcounts[unigram]
+
+        # if this method has already been calculated before, find answer in TrigramModel instance
+        total = 0
+        if(self.numberOfWords):
+            total = self.numberOfWords
+        else:
+            # including non-unique unigrams
+            for i in self.unigramcounts:
+                total += self.unigramcounts[i]
+            self.numberOfWords = total
+
+        raw_probability = input_count/total
+
+        print('Input unigram count: ', input_count)
+        print('Total number of unigrams: ', total)
+        print('Raw input unigram probability: ', raw_probability)
+
+        return raw_probability
 
     def generate_sentence(self,t=20): 
         """
@@ -188,8 +260,15 @@ if __name__ == "__main__":
     model = TrigramModel(sys.argv[1]) 
 
     #### My tests
+    ## Part 1
     # get_ngrams(["natural","language","processing"],1)
 
+    # Part 3
+    # model.raw_unigram_probability(('the',))
+    # print('\n')
+    # model.raw_bigram_probability(('the','jurors'))
+    # print('\n')
+    # model.raw_trigram_probability(('START','START','the'))
 
     # put test code here...
     # or run the script from the command line with 
