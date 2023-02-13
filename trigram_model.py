@@ -137,7 +137,7 @@ class TrigramModel(object):
 
         bigram = tuple([(trigram[0:2])])
 
-        if(bigram == (('START', 'START'),)):
+        if(bigram == (('START', 'START'),) or self.bigramcounts[bigram] == 0):
             bigram_count = self.numberOfSentences
             print('Bigram count (# sentences): ', bigram, ' ', bigram_count)
         else:
@@ -162,7 +162,7 @@ class TrigramModel(object):
         print('Input bigram count: ', bigram_count)
 
         unigram = tuple([(bigram[0])])
-        if(unigram == ('START',)):
+        if(unigram == ('START',) or self.unigramcounts[unigram] == 0):
             unigram_count = self.numberOfSentences
             print('Unigram count (# sentences): ', unigram, ' ', unigram_count)
         else:
@@ -230,7 +230,7 @@ class TrigramModel(object):
 
         smoothed_probability = product_1 + product_2 + product_3
         print('Smoothed Trigram probability: ', smoothed_probability)
-        
+
         return smoothed_probability
         
     def sentence_logprob(self, sentence):
@@ -238,7 +238,16 @@ class TrigramModel(object):
         COMPLETE THIS METHOD (PART 5)
         Returns the log probability of an entire sequence.
         """
-        return float("-inf")
+
+        ngrams = get_ngrams(sentence, 3)
+        log_probabilities = 0
+
+        for trigram in ngrams:
+            log_probabilities += math.log2(self.smoothed_trigram_probability(trigram))
+            print(trigram)
+
+        print(log_probabilities)
+        return log_probabilities
 
     def perplexity(self, corpus):
         """
@@ -282,7 +291,11 @@ if __name__ == "__main__":
     # model.raw_trigram_probability(('START','START','the'))
 
     # Part 4
-    model.smoothed_trigram_probability(('START','START','the'))
+    # model.smoothed_trigram_probability(('START','START','the'))
+
+    # Part 5
+    sentence = ["natural","language","processing"]
+    model.sentence_logprob(sentence)
 
     # put test code here...
     # or run the script from the command line with 
