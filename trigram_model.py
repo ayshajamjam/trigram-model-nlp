@@ -217,10 +217,21 @@ class TrigramModel(object):
         COMPLETE THIS METHOD (PART 4)
         Returns the smoothed trigram probability (using linear interpolation). 
         """
+
         lambda1 = 1/3.0
         lambda2 = 1/3.0
         lambda3 = 1/3.0
-        return 0.0
+
+        product_1 = lambda1 * self.raw_trigram_probability(trigram)
+        bigram = tuple(trigram[0:2])
+        product_2 = lambda2 * self.raw_bigram_probability(bigram)
+        unigram = tuple(trigram[0:1])
+        product_3 = lambda3 * self.raw_unigram_probability(unigram)
+
+        smoothed_probability = product_1 + product_2 + product_3
+        print('Smoothed Trigram probability: ', smoothed_probability)
+        
+        return smoothed_probability
         
     def sentence_logprob(self, sentence):
         """
@@ -269,6 +280,9 @@ if __name__ == "__main__":
     # model.raw_bigram_probability(('the','jurors'))
     # print('\n')
     # model.raw_trigram_probability(('START','START','the'))
+
+    # Part 4
+    model.smoothed_trigram_probability(('START','START','the'))
 
     # put test code here...
     # or run the script from the command line with 
