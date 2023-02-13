@@ -281,21 +281,27 @@ def essay_scoring_experiment(training_file1, training_file2, testdir1, testdir2)
         model2 = TrigramModel(training_file2)
 
         total = 0
-        correct = 0       
- 
+        correct = 0
+
         for f in os.listdir(testdir1):
-            pp = model1.perplexity(corpus_reader(os.path.join(testdir1, f), model1.lexicon))
-            # .. 
+            pp_mod1 = model1.perplexity(corpus_reader(os.path.join(testdir1, f), model1.lexicon))
+            pp_mod2 = model2.perplexity(corpus_reader(os.path.join(testdir1, f), model2.lexicon))
+            if(pp_mod1 < pp_mod2):
+                correct += 1
+            total += 1
     
         for f in os.listdir(testdir2):
-            pp = model2.perplexity(corpus_reader(os.path.join(testdir2, f), model2.lexicon))
-            # .. 
+            pp_mod2 = model2.perplexity(corpus_reader(os.path.join(testdir2, f), model2.lexicon))
+            pp_mod1 = model1.perplexity(corpus_reader(os.path.join(testdir2, f), model1.lexicon))
+            if(pp_mod2 < pp_mod1):
+                correct += 1
+            total += 1 
         
-        return 0.0
+        return correct/total
 
 if __name__ == "__main__":
 
-    model = TrigramModel(sys.argv[1]) 
+    # model = TrigramModel(sys.argv[1]) 
 
     #### My tests
     ## Part 1
@@ -303,8 +309,8 @@ if __name__ == "__main__":
 
     # Part 3
     # model.raw_unigram_probability(('the',))
-    print(model.raw_bigram_probability(('START', 'the')))
-    print(model.raw_trigram_probability(('START','START', 'the')))
+    # print(model.raw_bigram_probability(('START', 'the')))
+    # print(model.raw_trigram_probability(('START','START', 'the')))
 
     # print('\n')
     # model.raw_bigram_probability(('the','jurors'))
@@ -324,8 +330,6 @@ if __name__ == "__main__":
     # model.sentence_logprob(sentence)
 
     # Part 6
-   
-
     # put test code here...
     # or run the script from the command line with 
     # $ python -i trigram_model.py [corpus_file]
@@ -335,10 +339,14 @@ if __name__ == "__main__":
     # Python prompt. 
 
     # Testing perplexity: 
-    dev_corpus = corpus_reader(sys.argv[2], model.lexicon)
-    pp = model.perplexity(dev_corpus)
-    print(pp)
+    # dev_corpus = corpus_reader(sys.argv[2], model.lexicon)
+    # pp = model.perplexity(dev_corpus)
+    # print(pp)
 
     # Essay scoring experiment: 
     # acc = essay_scoring_experiment('train_high.txt', 'train_low.txt", "test_high", "test_low")
     # print(acc)
+
+    acc = essay_scoring_experiment('hw1_data/ets_toefl_data/train_high.txt', 'hw1_data/ets_toefl_data/train_low.txt', 'hw1_data/ets_toefl_data/test_high', 'hw1_data/ets_toefl_data/test_low')
+    print(acc)
+    
