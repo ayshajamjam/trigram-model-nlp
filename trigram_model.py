@@ -25,7 +25,7 @@ def get_lexicon(corpus):
     for sentence in corpus:
         for word in sentence: 
             word_counts[word] += 1
-    return set(word for word in word_counts if word_counts[word] > 1), len(word_counts)
+    return set(word for word in word_counts if word_counts[word] > 1)
 
 
 def get_ngrams(sequence, n):
@@ -46,16 +46,12 @@ def get_ngrams(sequence, n):
             modified_list += ['START']
     modified_list += sequence + ['STOP']
 
-    # print('Modified List: ', modified_list)
-
     tuple_list = []
     for i in range(0, len(modified_list)):
         single_tuple = modified_list[i:i+n]
         tuple_list.append(tuple(single_tuple))
         if(modified_list[i+(n-1)] == 'STOP'):
             break
-
-    # print('N Tuple List: ', tuple_list)
 
     return tuple_list
 
@@ -66,8 +62,7 @@ class TrigramModel(object):
     
         # Iterate through the corpus once to build a lexicon 
         generator = corpus_reader(corpusfile)
-        self.lexicon, self.lexicon_size = get_lexicon(generator)
-        print(self.lexicon_size)
+        self.lexicon = get_lexicon(generator)
         self.lexicon.add("UNK")
         self.lexicon.add("START")
         self.lexicon.add("STOP")
@@ -115,14 +110,6 @@ class TrigramModel(object):
                 trigram_size += 1
                 self.trigramcounts[tup] += 1
 
-        # print(self.unigramcounts[('the',)])
-        # print(self.bigramcounts[('START','the')])
-        # print(self.trigramcounts[('START','START','the')])
-        # print('Unigram size: ', unigram_size)
-        # print('Bigram size: ', bigram_size)
-        # print('Trigram size: ', trigram_size)
-        # print('\n')
-
         return
 
     def raw_trigram_probability(self,trigram):
@@ -132,24 +119,17 @@ class TrigramModel(object):
         """
 
         trigram_count = self.trigramcounts[trigram]
-        # print('Input trigram count: ', trigram_count)
         
         bigram = tuple((trigram[0:2]))
-        # print(tuple((trigram[1:3])))
 
         if(bigram == (('START', 'START'))):
             bigram_count = self.numberOfSentences
-            # print('Bigram count (# sentences): ', bigram, ' ', bigram_count)
         elif(self.bigramcounts[bigram] == 0):
-            return (float)(1/self.lexicon_size)
-            # print('Bigram count ("unseen"): ', bigram_count)
+            return (float)(1/(len(self.unigramcounts)))
         else:
             bigram_count = self.bigramcounts[bigram]
-            # print('Bigram count: ', bigram, ' ', bigram_count)
 
         raw_probability = trigram_count/bigram_count
-
-        # print('Raw input trigram probability: ', raw_probability)
 
         return raw_probability
 
@@ -161,20 +141,13 @@ class TrigramModel(object):
 
         bigram_count = self.bigramcounts[bigram]
 
-        # print(bigram)
-        # print('Input bigram count: ', bigram_count)
-
         unigram = tuple([(bigram[0])])
-        # print(unigram)
         if(unigram == ('START',)):
             unigram_count = self.numberOfSentences
-            # print('Unigram count (# sentences): ', unigram, ' ', unigram_count)
         else:
             unigram_count = self.unigramcounts[unigram]
-            # print('Unigram count: ', unigram, ' ', unigram_count)
 
         raw_probability = bigram_count/unigram_count
-        # print('Raw input bigram probability: ', raw_probability)
 
         return raw_probability
     
@@ -191,19 +164,13 @@ class TrigramModel(object):
         if(self.numberOfWords):
             total = self.numberOfWords
         else:
-            # size of the lexicon (unique words) 
-            # total = len(self.unigramcounts)
-            # # including non-unique unigrams
+            # including non-unique unigrams
             for i in self.unigramcounts:
                 if(i != ('START',)):
                     total += self.unigramcounts[i]
             self.numberOfWords = total
 
         raw_probability = input_count/total
-
-        # print('Input unigram count: ', input_count)
-        # print('Total number of unigrams: ', total)
-        # print('Raw input unigram probability: ', raw_probability)
 
         return raw_probability
 
@@ -233,8 +200,6 @@ class TrigramModel(object):
 
         smoothed_probability = product_1 + product_2 + product_3
 
-        # print('Smoothed Trigram probability: ', smoothed_probability)
-
         return smoothed_probability
         
     def sentence_logprob(self, sentence):
@@ -247,10 +212,8 @@ class TrigramModel(object):
         log_probabilities = 0
 
         for trigram in ngrams:
-            # print(trigram)
             log_probabilities += math.log2(self.smoothed_trigram_probability(trigram))
 
-        # print('Log probability:', log_probabilities)
         return log_probabilities
 
     def perplexity(self, corpus):
@@ -263,14 +226,11 @@ class TrigramModel(object):
         test_number_of_words = 0
 
         for sentence in corpus:
-            # print(sentence)
             test_number_of_words += len(sentence) + 1
             corpus_log_probabilites += self.sentence_logprob(sentence)
 
         l = (float)(corpus_log_probabilites/test_number_of_words)
-        print("l: ", l)
         perplexity = math.pow(2, -l)
-        print('Perplexity: ', perplexity)
 
         return perplexity
 
@@ -301,52 +261,13 @@ def essay_scoring_experiment(training_file1, training_file2, testdir1, testdir2)
 
 if __name__ == "__main__":
 
-    # model = TrigramModel(sys.argv[1]) 
-
-    #### My tests
-    ## Part 1
-    # get_ngrams(["natural","language","processing"],1)
-
-    # Part 3
-    # model.raw_unigram_probability(('the',))
-    # print(model.raw_bigram_probability(('START', 'the')))
-    # print(model.raw_trigram_probability(('START','START', 'the')))
-
-    # print('\n')
-    # model.raw_bigram_probability(('the','jurors'))
-    # print('\n')
-    # model.raw_trigram_probability(('START','START','the'))
-
-    # print(model.raw_unigram_probability(('waiting',)))
-    # print(model.raw_bigram_probability(('START', 'waiting')))
-    # print(model.raw_trigram_probability(('START', 'START', 'waiting')))
-    # print(model.smoothed_trigram_probability(('START', 'START', 'waiting')))
-
-    # Part 4
-    # model.smoothed_trigram_probability(('START','START','waiting'))
-
-    # Part 5
-    # sentence = ["natural","language","processing"]
-    # model.sentence_logprob(sentence)
-
-    # Part 6
-    # put test code here...
-    # or run the script from the command line with 
-    # $ python -i trigram_model.py [corpus_file]
-    # >>> 
-    #
-    # you can then call methods on the model instance in the interactive 
-    # Python prompt. 
+    model = TrigramModel(sys.argv[1]) 
 
     # Testing perplexity: 
-    # dev_corpus = corpus_reader(sys.argv[2], model.lexicon)
-    # pp = model.perplexity(dev_corpus)
-    # print(pp)
-
-    # Essay scoring experiment: 
-    # acc = essay_scoring_experiment('train_high.txt', 'train_low.txt", "test_high", "test_low")
-    # print(acc)
+    dev_corpus = corpus_reader(sys.argv[2], model.lexicon)
+    pp = model.perplexity(dev_corpus)
+    print('Perplexity: ', pp)
 
     acc = essay_scoring_experiment('hw1_data/ets_toefl_data/train_high.txt', 'hw1_data/ets_toefl_data/train_low.txt', 'hw1_data/ets_toefl_data/test_high', 'hw1_data/ets_toefl_data/test_low')
-    print(acc)
+    print('Accuracy: ', acc)
     
