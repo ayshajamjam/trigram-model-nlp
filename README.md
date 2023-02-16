@@ -1,7 +1,12 @@
 # Essay Classification with n-Gram Model Natural Language Processing
 
 ## About This Project
-In this project, we had to build a trigram language model in Python.
+In this project, we had to build a trigram language model in Python. We used supervised learning to train the model on brown_train.txt and used brown_test.txt to test the model.
+
+## Run
+
+python3 trigram_model.py brown_train.txt brown_train.txt
+python3 trigram_model.py brown_train.txt brown_test.txt
 
 ## Part 1 - extracting n-grams from a sentence
 Complete the function get_ngrams, which takes a list of strings and an integer n as input, and returns padded n-grams over the list of strings. The result should be a list of Python tuples. 
@@ -70,7 +75,7 @@ Each of these methods should return an unsmoothed probability computed from the 
 Write the method smoothed_trigram_probability(self, trigram) which uses linear interpolation between the raw trigram, unigram, and bigram probabilities (see lecture for how to compute this). Set the interpolation parameters to lambda1 = lambda2 = lambda3 = 1/3. Use the raw probability methods defined before. 
 
 ## Part 5 - Computing Sentence Probability
-Write the method sentence_logprob(sentence), which returns the log probability of an entire sequence (see lecture how to compute this). Use the get_ngrams function to compute trigrams and the smoothed_trigram_probabilitymethod to obtain probabilities. Convert each probability into logspace using math.log2
+Write the method sentence_logprob(sentence), which returns the log probability of an entire sequence (see lecture how to compute this). Use the get_ngrams function to compute trigrams and the smoothed_trigram_probability method to obtain probabilities. Convert each probability into logspace using math.log2
 
 Then, instead of multiplying probabilities, add the log probabilities. Regular probabilities would quickly become too small, leading to numeric issues, so we typically work with log probabilities instead. 
 
