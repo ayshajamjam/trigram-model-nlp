@@ -30,9 +30,8 @@ def get_lexicon(corpus):
 
 def get_ngrams(sequence, n):
     """
-    COMPLETE THIS FUNCTION (PART 1)
-    Given a sequence, this function should return a list of n-grams, where each n-gram is a Python tuple.
-    This should work for arbitrary values of n >= 1 
+    PART 1- Given a sequence, this function returns a list of n-grams, where each n-gram is a Python tuple.
+    This works for arbitrary values of n >= 1 
     """
 
     if (n < 1):
@@ -77,8 +76,7 @@ class TrigramModel(object):
 
     def count_ngrams(self, corpus):
         """
-        COMPLETE THIS METHOD (PART 2)
-        Given a corpus iterator, populate dictionaries of unigram, bigram,
+        PART 2) Given a corpus iterator, populate dictionaries of unigram, bigram,
         and trigram counts. 
         """
    
@@ -114,8 +112,7 @@ class TrigramModel(object):
 
     def raw_trigram_probability(self,trigram):
         """
-        COMPLETE THIS METHOD (PART 3)
-        Returns the raw (unsmoothed) trigram probability
+        PART 3) Returns the raw (unsmoothed) trigram probability
         """
 
         trigram_count = self.trigramcounts[trigram]
@@ -135,8 +132,7 @@ class TrigramModel(object):
 
     def raw_bigram_probability(self, bigram):
         """
-        COMPLETE THIS METHOD (PART 3)
-        Returns the raw (unsmoothed) bigram probability
+        PART 3) Returns the raw (unsmoothed) bigram probability
         """
 
         bigram_count = self.bigramcounts[bigram]
@@ -153,8 +149,7 @@ class TrigramModel(object):
     
     def raw_unigram_probability(self, unigram):
         """
-        COMPLETE THIS METHOD (PART 3)
-        Returns the raw (unsmoothed) unigram probability.
+        PART 3) Returns the raw (unsmoothed) unigram probability.
         """
 
         input_count = self.unigramcounts[unigram]
@@ -172,20 +167,11 @@ class TrigramModel(object):
 
         raw_probability = input_count/total
 
-        return raw_probability
-
-    def generate_sentence(self,t=20): 
-        """
-        COMPLETE THIS METHOD (OPTIONAL)
-        Generate a random sentence from the trigram model. t specifies the
-        max length, but the sentence may be shorter if STOP is reached.
-        """
-        return result            
+        return raw_probability    
 
     def smoothed_trigram_probability(self, trigram):
         """
-        COMPLETE THIS METHOD (PART 4)
-        Returns the smoothed trigram probability (using linear interpolation). 
+        PART 4) Returns the smoothed trigram probability (using linear interpolation). 
         """
 
         lambda1 = 1/3.0
@@ -204,8 +190,7 @@ class TrigramModel(object):
         
     def sentence_logprob(self, sentence):
         """
-        COMPLETE THIS METHOD (PART 5)
-        Returns the log probability of an entire sequence.
+        PART 5) Returns the log probability of an entire sequence.
         """
 
         ngrams = get_ngrams(sentence, 3)
@@ -218,8 +203,7 @@ class TrigramModel(object):
 
     def perplexity(self, corpus):
         """
-        COMPLETE THIS METHOD (PART 6) 
-        Returns the log probability of an entire sequence.
+        PART 6) Returns the log probability of an entire sequence.
         """
 
         corpus_log_probabilites = 0
@@ -237,12 +221,13 @@ class TrigramModel(object):
 
 def essay_scoring_experiment(training_file1, training_file2, testdir1, testdir2):
 
-        model1 = TrigramModel(training_file1)
-        model2 = TrigramModel(training_file2)
+        model1 = TrigramModel(training_file1)   # model trained on high-scoring essays
+        model2 = TrigramModel(training_file2)   # model trained on low-scoring essays
 
         total = 0
         correct = 0
 
+        # Testing high scores
         for f in os.listdir(testdir1):
             pp_mod1 = model1.perplexity(corpus_reader(os.path.join(testdir1, f), model1.lexicon))
             pp_mod2 = model2.perplexity(corpus_reader(os.path.join(testdir1, f), model2.lexicon))
@@ -250,9 +235,10 @@ def essay_scoring_experiment(training_file1, training_file2, testdir1, testdir2)
                 correct += 1
             total += 1
     
+        # Testing low scores
         for f in os.listdir(testdir2):
-            pp_mod2 = model2.perplexity(corpus_reader(os.path.join(testdir2, f), model2.lexicon))
             pp_mod1 = model1.perplexity(corpus_reader(os.path.join(testdir2, f), model1.lexicon))
+            pp_mod2 = model2.perplexity(corpus_reader(os.path.join(testdir2, f), model2.lexicon))
             if(pp_mod2 < pp_mod1):
                 correct += 1
             total += 1 
